@@ -2,7 +2,6 @@ package gflag
 
 import (
 	"strconv"
-	"os"
 )
 
 type Flag struct {
@@ -30,7 +29,7 @@ func (b BoolValue) String() string {
 }
 
 func (b *BoolValue) Set(value string) error {
-	if parsed, error := strconv.ParseBool(value); error {
+	if parsed, error := strconv.ParseBool(value); error != nil {
 		return error
 	} else {
 		b.value = parsed
@@ -38,9 +37,21 @@ func (b *BoolValue) Set(value string) error {
 	}
 }
 
-func newBoolValue(val bool, p *bool) *BoolValue {
+type boolValue bool
+
+func newBoolValue(val bool, p *bool) *boolValue {
 	*p = val
-	return (*BoolValue)(p)
+	return (*boolValue)(p)
+}
+
+func (b *boolValue) Set(s string) error {
+	v, err := strconv.ParseBool(s)
+	*b = boolValue(v)
+	return err
+}
+
+func (b *boolValue) String() string {
+	return strconv.FormatBool(bool(*b))
 }
 
 type StringValue struct {
@@ -57,18 +68,41 @@ func (s *StringValue) Set(value string) error {
 	return nil
 }
 
-func newStringValue(val string, p *string) *StringValue {
+type stringVal string
+
+func newStringValue(val string, p *string) *stringVal {
 	*p = val
-	return (*StringValue)(p)
+	return (*stringVal)(p)
+}
+
+func (s *stringVal) Set(value string) error {
+	*s = stringVal(value)
+	return nil
+}
+
+func (s stringVal) String() string {
+	return string(s)
 }
 
 type IntValue struct {
 	value int
 }
 
-func newIntValue(val IntValue, p *IntValue) *IntValue {
+type intVal int
+
+func (i *intVal) Set(val string) error {
+	v, err := strconv.Atoi(val)
+	*i = intVal(v)
+	return err
+}
+
+func (i *intVal) String() string {
+	return strconv.FormatInt(int64(*i), 10)
+}
+
+func newIntValue(val int, p *int) *intVal {
 	*p = val
-	return (*IntValue)(p)
+	return (*intVal)(p)
 }
 
 func (i IntValue) String() string {
@@ -76,7 +110,7 @@ func (i IntValue) String() string {
 }
 
 func (i *IntValue) Set(value string) error {
-	if parsed, err := strconv.Atoi(value); err {
+	if parsed, err := strconv.Atoi(value); err != nil {
 		return err
 	} else {
 		i.value = parsed
