@@ -1,54 +1,128 @@
 package gflag
 
 import (
-	"os"
 	"strconv"
+	"os"
 )
+
+type Flag struct {
+	ShortName string
+	LongName  string
+	Usage     string
+	Value     Value
+}
+
+func NewFlag(shortName string, longName string, usage string, value Value) *Flag {
+	return &Flag{shortName, longName, usage, value}
+}
 
 type Value interface {
 	String() string
 	Set(string) error
 }
 
-// specifies boolean flags
-// by virtue of placing them they are set to true
-type BoolVal struct {
+type BoolValue struct {
 	value bool
 }
 
-func (b BoolVal) String() string {
-	if b.value {
-		return "true"
+func (b BoolValue) String() string {
+	return strconv.FormatBool(b.value)
+}
+
+func (b *BoolValue) Set(value string) error {
+	if parsed, error := strconv.ParseBool(value); error {
+		return error
 	} else {
-		return "false"
+		b.value = parsed
+		return nil
 	}
 }
 
-func (b *BoolVal) Set(value string) error {
-	parsed := strconv.ParseBool(value)
+func newBoolValue(val bool, p *bool) *BoolValue {
+	*p = val
+	return (*BoolValue)(p)
 }
 
-type StringVal struct {
+type StringValue struct {
 	value string
 }
 
-type Flag struct {
-	ShortName string
-	LongName string
-	Usage string
-	Value Value
+func (s StringValue) String() string {
+	return s.value
 }
 
-func Bool(shortName string, longName string, usage string) *Flag {
-	return &Flag{shortName, longName, usage, BoolVal{true}}
+func (s *StringValue) Set(value string) error {
+	// if we've made it this far there shouldn't be an error!
+	s.value = value
+	return nil
 }
 
-type FlagSet struct {
-	Usage func()
+func newStringValue(val string, p *string) *StringValue {
+	*p = val
+	return (*StringValue)(p)
+}
 
-	flags map[string]*Flag
+type IntValue struct {
+	value int
+}
+
+func newIntValue(val IntValue, p *IntValue) *IntValue {
+	*p = val
+	return (*IntValue)(p)
+}
+
+func (i IntValue) String() string {
+	return strconv.Itoa(i.value)
+}
+
+func (i *IntValue) Set(value string) error {
+	if parsed, err := strconv.Atoi(value); err {
+		return err
+	} else {
+		i.value = parsed
+		return nil
+	}
+}
+
+var FlagMap map[string]*Flag
+
+func init() {
+	FlagMap = make(map[string]*Flag)
+}
+
+func Bool(shortName string, longName string, usage string, defaultValue bool) *bool {
+	var accessor string
+	if len(shortName) == 0 {
+		accessor = longName
+	} else {
+		accessor = shortName
+	}
+
+	r := new(bool)
+	flag := NewFlag(shortName, longName, usage, newBoolValue(defaultValue, r))
+	setMap(accessor, flag)
+
+	return r
+}
+
+func Int(shortName string, longName string, usage string, defaultValue int) *int {
+	var accessor string
+	if len(shortName) == 0 {
+		accessor = longName
+	} else {
+		accessor = shortName
+	}
+
+	r := new(int)
+	flag := NewFlag(shortName, longName, usage, newIntValue(defaultValue, r))
+	setMap(accessor, flag)
+
+	return r
 }
 
 func Parse() {
+}
 
+func setMap(accessor string, flag *Flag) {
+	FlagMap[accessor] = flag
 }
