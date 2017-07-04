@@ -1,6 +1,8 @@
 package gflag
 
 import (
+	"github.com/rfaulhaber/gargs"
+	"sort"
 	"strconv"
 )
 
@@ -9,6 +11,17 @@ type Flag struct {
 	LongName  string
 	Usage     string
 	Value     Value
+}
+
+func (f Flag) Name() string {
+	var accessor string
+	if len(f.ShortName) == 0 {
+		accessor = f.LongName
+	} else {
+		accessor = f.ShortName
+	}
+
+	return accessor
 }
 
 func NewFlag(shortName string, longName string, usage string, value Value) *Flag {
@@ -29,8 +42,8 @@ func (b BoolValue) String() string {
 }
 
 func (b *BoolValue) Set(value string) error {
-	if parsed, error := strconv.ParseBool(value); error != nil {
-		return error
+	if parsed, err := strconv.ParseBool(value); err != nil {
+		return err
 	} else {
 		b.value = parsed
 		return nil
@@ -120,26 +133,67 @@ func (i *IntValue) Set(value string) error {
 
 var FlagMap map[string]*Flag
 
+var flagNames []string
+
 func init() {
 	FlagMap = make(map[string]*Flag)
 }
 
 func Bool(shortName string, longName string, usage string, defaultValue bool) *bool {
-	var accessor string
-	if len(shortName) == 0 {
-		accessor = longName
-	} else {
-		accessor = shortName
-	}
+	accessor := findAccessor(shortName, longName)
 
 	r := new(bool)
 	flag := NewFlag(shortName, longName, usage, newBoolValue(defaultValue, r))
 	setMap(accessor, flag)
+	setFlagName(accessor)
 
 	return r
 }
 
 func Int(shortName string, longName string, usage string, defaultValue int) *int {
+	accessor := findAccessor(shortName, longName)
+
+	r := new(int)
+	flag := NewFlag(shortName, longName, usage, newIntValue(defaultValue, r))
+	setMap(accessor, flag)
+	setFlagName(accessor)
+
+	return r
+}
+
+func Parse() {
+	for _, arg := range gargs.Args {
+		contains, flagName := containsFlag(arg)
+
+		if contains {
+			flag := FlagMap[flagName]
+
+			value, hasValue := gargs.ValueOf(arg)
+			nextValue, hasNextValue := gargs.Next(arg)
+
+			_, isFlag := gargs.FlagMap[nextValue]
+
+			if hasValue {
+				flag.Value.Set(value)
+			} else if hasNextValue && !isFlag {
+				flag.Value.Set(nextValue)
+			} else {
+				flag.Value.Set("true")
+			}
+		}
+	}
+}
+
+func setMap(accessor string, flag *Flag) {
+	FlagMap[accessor] = flag
+}
+
+func setFlagName(name string) {
+	flagNames = append(flagNames, name)
+	sort.Strings(flagNames)
+}
+
+func findAccessor(shortName string, longName string) string {
 	var accessor string
 	if len(shortName) == 0 {
 		accessor = longName
@@ -147,16 +201,15 @@ func Int(shortName string, longName string, usage string, defaultValue int) *int
 		accessor = shortName
 	}
 
-	r := new(int)
-	flag := NewFlag(shortName, longName, usage, newIntValue(defaultValue, r))
-	setMap(accessor, flag)
-
-	return r
+	return accessor
 }
 
-func Parse() {
-}
+func containsFlag(arg string) (contains bool, flagName string) {
+	for _, v := range FlagMap {
+		if v.ShortName == arg || v.LongName == arg {
+			return true, v.Name()
+		}
+	}
 
-func setMap(accessor string, flag *Flag) {
-	FlagMap[accessor] = flag
+	return false, ""
 }
