@@ -7,7 +7,10 @@ import (
 )
 
 func TestBool(t *testing.T) {
-	gargs.Args = []string{"t"}
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	os.Args = []string{"cmd", "-t"}
+
 	boolValue := Bool("t", "", "set when testing", false)
 
 	_, ok := FlagMap["t"]
@@ -24,7 +27,10 @@ func TestBool(t *testing.T) {
 }
 
 func TestBool2(t *testing.T) {
-	gargs.Args = []string{"testflag"}
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	os.Args = []string{"cmd", "--testflag"}
+
 	boolValue := Bool("", "testflag", "set when testing", false)
 
 	_, ok := FlagMap["testflag"]

@@ -162,6 +162,7 @@ func Int(shortName string, longName string, usage string, defaultValue int) *int
 }
 
 func Parse() {
+	gargs.ParseArgs()
 	for _, arg := range gargs.Args {
 		contains, flagName := containsFlag(arg)
 
