@@ -1,7 +1,6 @@
 package gflag
 
 import (
-	"github.com/rfaulhaber/gargs"
 	"os"
 	"testing"
 )
@@ -47,7 +46,9 @@ func TestBool2(t *testing.T) {
 }
 
 func TestInt(t *testing.T) {
-	gargs.Args = []string{"testflag", "22"}
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	os.Args = []string{"cmd", "--testflag=22"}
 	intValue := Int("", "testflag", "set when testing", 9)
 
 	_, ok := FlagMap["testflag"]
@@ -64,8 +65,9 @@ func TestInt(t *testing.T) {
 }
 
 func TestInt2(t *testing.T) {
-	gargs.Args = []string{"testflag"}
-	gargs.ArgsMap["testflag"] = "22"
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	os.Args = []string{"cmd", "--testflag", "22"}
 	intValue := Int("", "testflag", "set when testing", 9)
 
 	_, ok := FlagMap["testflag"]
