@@ -8,8 +8,11 @@ import (
 // TODO: rename these tests to something better!
 
 func TestBool(t *testing.T) {
+	resetArgs()
 	oldArgs := os.Args
-	defer func() { os.Args = oldArgs }()
+	defer func() {
+		os.Args = oldArgs
+	}()
 	os.Args = []string{"cmd", "-t"}
 
 	boolValue := Bool("t", "", "set when testing", false)
@@ -28,6 +31,7 @@ func TestBool(t *testing.T) {
 }
 
 func TestBool2(t *testing.T) {
+	resetArgs()
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"cmd", "--testflag"}
@@ -48,6 +52,7 @@ func TestBool2(t *testing.T) {
 }
 
 func TestBool3(t *testing.T) {
+	resetArgs()
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"cmd", "--testflag"}
@@ -68,6 +73,7 @@ func TestBool3(t *testing.T) {
 }
 
 func TestInt(t *testing.T) {
+	resetArgs()
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"cmd", "--testflag=22"}
@@ -88,6 +94,7 @@ func TestInt(t *testing.T) {
 }
 
 func TestInt2(t *testing.T) {
+	resetArgs()
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"cmd", "--testflag", "22"}
@@ -108,6 +115,7 @@ func TestInt2(t *testing.T) {
 }
 
 func TestInt3(t *testing.T) {
+	resetArgs()
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"cmd", "--t=22"}
@@ -128,6 +136,7 @@ func TestInt3(t *testing.T) {
 }
 
 func TestInt4(t *testing.T) {
+	resetArgs()
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
 	os.Args = []string{"cmd", "-t", "22"}
@@ -151,4 +160,8 @@ func TestMain(m *testing.M) {
 	// TODO: add Parse() here
 	retCode := m.Run()
 	os.Exit(retCode)
+}
+
+func resetArgs() {
+	FlagMap = make(map[string]*Flag)
 }
