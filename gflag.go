@@ -2,7 +2,6 @@ package gflag
 
 import (
 	"github.com/rfaulhaber/gargs"
-	"sort"
 	"strconv"
 )
 
@@ -133,8 +132,6 @@ func (i *IntValue) Set(value string) error {
 
 var FlagMap map[string]*Flag
 
-var flagNames []string
-
 func init() {
 	FlagMap = make(map[string]*Flag)
 }
@@ -142,10 +139,10 @@ func init() {
 func Bool(shortName string, longName string, usage string, defaultValue bool) *bool {
 	accessor := findAccessor(shortName, longName)
 
+	// TODO: refactor this? extract somehow?
 	r := new(bool)
 	flag := NewFlag(shortName, longName, usage, newBoolValue(defaultValue, r))
 	setMap(accessor, flag)
-	setFlagName(accessor)
 
 	return r
 }
@@ -156,7 +153,6 @@ func Int(shortName string, longName string, usage string, defaultValue int) *int
 	r := new(int)
 	flag := NewFlag(shortName, longName, usage, newIntValue(defaultValue, r))
 	setMap(accessor, flag)
-	setFlagName(accessor)
 
 	return r
 }
@@ -187,11 +183,6 @@ func Parse() {
 
 func setMap(accessor string, flag *Flag) {
 	FlagMap[accessor] = flag
-}
-
-func setFlagName(name string) {
-	flagNames = append(flagNames, name)
-	sort.Strings(flagNames)
 }
 
 func findAccessor(shortName string, longName string) string {
