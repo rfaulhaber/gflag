@@ -157,6 +157,16 @@ func Int(shortName string, longName string, usage string, defaultValue int) *int
 	return r
 }
 
+func String(shortName string, longName string, usage string, defaultValue string) *string {
+	accessor := findAccessor(shortName, longName)
+
+	r := new(string)
+	flag := NewFlag(shortName, longName, usage, newStringValue(defaultValue, r))
+	setMap(accessor, flag)
+
+	return r
+}
+
 func Parse() {
 	gargs.ParseArgs()
 	for _, arg := range gargs.Args {
