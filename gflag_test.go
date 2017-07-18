@@ -115,6 +115,68 @@ func TestBool5(t *testing.T) {
 	}
 }
 
+func TestBool6(t *testing.T) {
+	resetArgs()
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	os.Args = []string{"cmd", "-ta"}
+
+	boolValue := Bool("t", "testflag", "set when testing", false)
+	secondBoolValue := Bool("a", "anotherTestFlag", "set when testing", false)
+
+	_, ok := FlagMap["t"]
+	_, ok2 := FlagMap["a"]
+
+	if !ok {
+		t.Error("Key was not added to flagmap")
+	}
+
+	if !ok2 {
+		t.Error("Key was not added to flagmap")
+	}
+
+	Parse()
+
+	if !*boolValue {
+		t.Error("reference was not set", "reference", *boolValue)
+	}
+
+	if !*secondBoolValue {
+		t.Error("reference was not set", "reference", *secondBoolValue)
+	}
+}
+
+func TestBool7(t *testing.T) {
+	resetArgs()
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	os.Args = []string{"cmd", "-t", "-a"}
+
+	boolValue := Bool("t", "testflag", "set when testing", false)
+	secondBoolValue := Bool("a", "anotherTestFlag", "set when testing", false)
+
+	_, ok := FlagMap["t"]
+	_, ok2 := FlagMap["a"]
+
+	if !ok {
+		t.Error("Key was not added to flagmap")
+	}
+
+	if !ok2 {
+		t.Error("Key was not added to flagmap")
+	}
+
+	Parse()
+
+	if !*boolValue {
+		t.Error("reference was not set", "reference", *boolValue)
+	}
+
+	if !*secondBoolValue {
+		t.Error("reference was not set", "reference", *secondBoolValue)
+	}
+}
+
 func TestInt(t *testing.T) {
 	resetArgs()
 	oldArgs := os.Args
