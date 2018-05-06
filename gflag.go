@@ -3,6 +3,7 @@ package gflag
 import (
 	"github.com/rfaulhaber/gargs"
 	"strconv"
+	"strings"
 )
 
 type Flag struct {
@@ -186,6 +187,13 @@ func Parse() {
 				flag.Value.Set(nextValue)
 			} else {
 				flag.Value.Set("true")
+			}
+		} else if isFlag, flagType := gargs.Flag(arg); isFlag && flagType == gargs.Short && len(arg) > 1 {
+			subFlags := strings.Split(arg, "")
+
+			for _, subFlag := range subFlags {
+				flagVal := FlagMap[subFlag]
+				flagVal.Value.Set("true")
 			}
 		}
 	}
