@@ -25,4 +25,4 @@ and `*enableLogging` will be `true`.
 
 If you leave either the short or long option blank, the only valid flag will be the one you specify.
 
-GoDoc documentation in progress.
+*NOTE* this project will no longer receive updates and is deprecated in favor of spf13's [pflag](https://github.com/spf13/pflag) library, which is much better than this repo.
